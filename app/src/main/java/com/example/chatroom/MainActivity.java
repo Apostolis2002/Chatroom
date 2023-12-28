@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -18,44 +20,103 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 
 public class MainActivity extends AppCompatActivity {
-    EditText email,password,nickname;
-    FirebaseAuth auth;
-    FirebaseUser user;
+    private EditText emailEditText,passwordEditText,nicknameEditText;
+    private Button signInButton,signUpButton,signOutButton,chatroomButton;
+    private TextView welcomeTextView;
+    private FirebaseAuth auth;
+    private FirebaseUser user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        email = findViewById(R.id.editTextText);
-        password = findViewById(R.id.editTextTextPassword);
-        nickname = findViewById(R.id.editTextText2);
+
+        emailEditText = findViewById(R.id.emailEditText);
+        passwordEditText = findViewById(R.id.passwordEditText);
+        nicknameEditText = findViewById(R.id.nicknameEditText);
+        signInButton = findViewById(R.id.signInButton);
+        signUpButton = findViewById(R.id.signUpButton);
+        signOutButton = findViewById(R.id.signOutButton);
+        chatroomButton = findViewById(R.id.chatroomButton);
+        welcomeTextView = findViewById(R.id.welcomeTextView);
+
         auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser();
         if (user!=null){
-            Button b = findViewById(R.id.button);
-            b.setVisibility(View.GONE);
+            setComponentsVisibility(user!=null, user.getDisplayName());
+        }else{
+            setComponentsVisibility(user!=null, "");
         }
+
     }
 
     public void signup(View view){
-        if(!email.getText().toString().isEmpty() &&
-        !password.getText().toString().isEmpty() &&
-        !nickname.getText().toString().isEmpty()){
-            auth.createUserWithEmailAndPassword(email.getText().toString(),password.getText().toString())
+        if(!emailEditText.getText().toString().isEmpty() &&
+        !passwordEditText.getText().toString().isEmpty() &&
+        !nicknameEditText.getText().toString().isEmpty()){
+            auth.createUserWithEmailAndPassword(emailEditText.getText().toString(),passwordEditText.getText().toString())
                     .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()){
                                 user = auth.getCurrentUser();
-                                updateUser(user,nickname.getText().toString());
+
+                                updateUser(user,nicknameEditText.getText().toString());
+
+                                setComponentsVisibility(true, user.getDisplayName());
                                 showMessage("Success","User profile created!");
                             }else {
-                                showMessage("Error",task.getException().getLocalizedMessage());
+                                user = null;
+                                setComponentsVisibility(false, "");
+                                showMessage("Error","Something went wrong!"/*task.getException().getLocalizedMessage()*/);
                             }
                         }
                     });
         }else {
             showMessage("Error","Please provide all info!");
+        }
+    }
+
+    public void signin(View view){
+        if(!emailEditText.getText().toString().isEmpty() &&
+                !passwordEditText.getText().toString().isEmpty()) {
+            auth.signInWithEmailAndPassword(emailEditText.getText().toString(),
+                    passwordEditText.getText().toString()).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                @Override
+                public void onComplete(@NonNull Task<AuthResult> task) {
+                    if (task.isSuccessful()){
+                        user = auth.getCurrentUser();
+                        updateUser(user,nicknameEditText.getText().toString());
+
+                        setComponentsVisibility(true, user.getDisplayName());
+                        showMessage("Success","User signed in successfully!");
+                    }else {
+                        user = null;
+
+                        setComponentsVisibility(false, "");
+                        showMessage("Error","Check your credentials!"/*task.getException().getLocalizedMessage()*/);
+                    }
+                }
+            });
+        }
+    }
+
+    public void signout (View view){
+        auth.signOut();
+        user = null;
+        setComponentsVisibility(false, "");
+        emptyEditTexts();
+        Toast.makeText(this,"You are successfully signed out!",Toast.LENGTH_SHORT).show();
+    }
+
+    public void chat(View view){
+        if (user!=null){
+            Intent intent = new Intent(this, ChatroomActivity.class);
+            intent.putExtra("nickname",user.getDisplayName());
+            //intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivity(intent);
+        }else {
+            showMessage("Error","Please sign-in or create an account first!");
         }
     }
 
@@ -66,36 +127,39 @@ public class MainActivity extends AppCompatActivity {
         user.updateProfile(request);
     }
 
-    public void signin(View view){
-        if(!email.getText().toString().isEmpty() &&
-                !password.getText().toString().isEmpty()) {
-            auth.signInWithEmailAndPassword(email.getText().toString(),
-                    password.getText().toString()).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                @Override
-                public void onComplete(@NonNull Task<AuthResult> task) {
-                    if (task.isSuccessful()){
-                        updateUser(auth.getCurrentUser(),nickname.getText().toString());
-                        showMessage("Success","User signed in successfully!");
-                    }else {
-                        showMessage("Error",task.getException().getLocalizedMessage());
-                    }
-                }
-            });
-        }
-    }
-
-    public void chat(View view){
-        if (user!=null){
-            Intent intent = new Intent(this, MainActivity2.class);
-            intent.putExtra("nickname",user.getDisplayName());
-            //intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-            startActivity(intent);
-        }else {
-            showMessage("Error","Please sign-in or create an account first!");
-        }
-    }
-
-    void showMessage(String title, String message){
+    private void showMessage(String title, String message){
         new AlertDialog.Builder(this).setTitle(title).setMessage(message).setCancelable(true).show();
+    }
+
+    private void emptyEditTexts(){
+        emailEditText.setText("");
+        passwordEditText.setText("");
+        nicknameEditText.setText("");
+    }
+
+    private void setComponentsVisibility(boolean userAuthenticated,String nickname){
+        if (userAuthenticated) {
+            emailEditText.setVisibility(View.GONE);
+            passwordEditText.setVisibility(View.GONE);
+            nicknameEditText.setVisibility(View.GONE);
+            signInButton.setVisibility(View.GONE);
+            signUpButton.setVisibility(View.GONE);
+            signOutButton.setVisibility(View.VISIBLE);
+            chatroomButton.setVisibility(View.VISIBLE);
+
+            welcomeTextView.setText("Welcome back,\n"+nickname);
+            welcomeTextView.setVisibility(View.VISIBLE);
+        }else {
+            emailEditText.setVisibility(View.VISIBLE);
+            passwordEditText.setVisibility(View.VISIBLE);
+            nicknameEditText.setVisibility(View.VISIBLE);
+            signInButton.setVisibility(View.VISIBLE);
+            signUpButton.setVisibility(View.VISIBLE);
+            signOutButton.setVisibility(View.GONE);
+            chatroomButton.setVisibility(View.GONE);
+
+            welcomeTextView.setText("");
+            welcomeTextView.setVisibility(View.GONE);
+        }
     }
 }

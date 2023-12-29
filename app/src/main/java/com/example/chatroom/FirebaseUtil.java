@@ -76,4 +76,8 @@ public class FirebaseUtil {
                     }
                 });
     }
+
+    static void signout() {
+        auth.signOut();
+    }
 }

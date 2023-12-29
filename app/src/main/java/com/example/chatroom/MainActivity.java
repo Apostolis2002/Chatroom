@@ -68,24 +68,13 @@ public class MainActivity extends AppCompatActivity {
     public void signin(View view){
         if(!emailEditText.getText().toString().isEmpty() &&
                 !passwordEditText.getText().toString().isEmpty()) {
-            auth.signInWithEmailAndPassword(emailEditText.getText().toString(),
-                    passwordEditText.getText().toString()).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                @Override
-                public void onComplete(@NonNull Task<AuthResult> task) {
-                    if (task.isSuccessful()){
-                        user = auth.getCurrentUser();
-                        updateUser(user,nicknameEditText.getText().toString());
 
-                        setComponentsVisibility(true, user.getDisplayName());
-                        showMessage("Success","User signed in successfully!");
-                    }else {
-                        user = null;
+            FirebaseUtil.signin(emailEditText.getText().toString()
+                    ,passwordEditText.getText().toString()
+                    ,this);
 
-                        setComponentsVisibility(false, "");
-                        showMessage("Error","Check your credentials!"/*task.getException().getLocalizedMessage()*/);
-                    }
-                }
-            });
+        }else {
+            showMessage("Error","Please provide all info!");
         }
     }
 

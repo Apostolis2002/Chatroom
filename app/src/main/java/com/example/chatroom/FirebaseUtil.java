@@ -61,4 +61,19 @@ public class FirebaseUtil {
                 });
     }
 
+    static void signin(String email, String password,MainActivity activity) {
+        auth.signInWithEmailAndPassword(email,password)
+                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if(task.isSuccessful()){
+                            activity.setComponentsVisibility(true, getNickname());
+                            activity.showMessage("Success","User signed in successfully!");
+                        }else {
+                            activity.setComponentsVisibility(false, "");
+                            activity.showMessage("Error","Check your credentials!");
+                        }
+                    }
+                });
+    }
 }

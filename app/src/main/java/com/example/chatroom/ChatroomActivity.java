@@ -25,7 +25,7 @@ public class ChatroomActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main2);
+        setContentView(R.layout.activity_activity);
         textView2 = findViewById(R.id.textView2);
         nickname = getIntent().getStringExtra("nickname");
         textView2.setText("Hello "+nickname);

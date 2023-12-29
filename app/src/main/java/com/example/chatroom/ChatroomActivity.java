@@ -16,7 +16,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 public class ChatroomActivity extends AppCompatActivity {
-    TextView textView2,allMeessages;
+    TextView textView2,allMessages;
     EditText message;
     String nickname;
     FirebaseDatabase database;
@@ -29,17 +29,17 @@ public class ChatroomActivity extends AppCompatActivity {
         textView2 = findViewById(R.id.textView2);
         nickname = getIntent().getStringExtra("nickname");
         textView2.setText("Hello "+nickname);
-        allMeessages = findViewById(R.id.textView3);
-        allMeessages.setText("");
+        allMessages = findViewById(R.id.textView3);
+        allMessages.setText("");
         message = findViewById(R.id.editTextText3);
         database = FirebaseDatabase.getInstance();
         reference = database.getReference("message");
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                String previousMessages = allMeessages.getText().toString();
+                String previousMessages = allMessages.getText().toString();
                 if (snapshot.getValue()!=null)
-                    allMeessages.setText(previousMessages+"\n"+snapshot.getValue().toString());
+                    allMessages.setText(previousMessages+"\n"+snapshot.getValue().toString());
             }
 
             @Override

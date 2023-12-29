@@ -43,9 +43,9 @@ public class MainActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser();
         if (user!=null){
-            setComponentsVisibility(user!=null, user.getDisplayName());
+            setComponentsVisibility(true, user.getDisplayName());
         }else{
-            setComponentsVisibility(user!=null, "");
+            setComponentsVisibility(false, "");
         }
 
     }
@@ -54,24 +54,12 @@ public class MainActivity extends AppCompatActivity {
         if(!emailEditText.getText().toString().isEmpty() &&
         !passwordEditText.getText().toString().isEmpty() &&
         !nicknameEditText.getText().toString().isEmpty()){
-            auth.createUserWithEmailAndPassword(emailEditText.getText().toString(),passwordEditText.getText().toString())
-                    .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if (task.isSuccessful()){
-                                user = auth.getCurrentUser();
 
-                                updateUser(user,nicknameEditText.getText().toString());
+            FirebaseUtil.signup(emailEditText.getText().toString()
+                    ,passwordEditText.getText().toString()
+                    ,nicknameEditText.getText().toString()
+                    ,this);
 
-                                setComponentsVisibility(true, user.getDisplayName());
-                                showMessage("Success","User profile created!");
-                            }else {
-                                user = null;
-                                setComponentsVisibility(false, "");
-                                showMessage("Error","Something went wrong!"/*task.getException().getLocalizedMessage()*/);
-                            }
-                        }
-                    });
         }else {
             showMessage("Error","Please provide all info!");
         }
@@ -127,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
         user.updateProfile(request);
     }
 
-    private void showMessage(String title, String message){
+    public void showMessage(String title, String message){
         new AlertDialog.Builder(this).setTitle(title).setMessage(message).setCancelable(true).show();
     }
 
@@ -137,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
         nicknameEditText.setText("");
     }
 
-    private void setComponentsVisibility(boolean userAuthenticated,String nickname){
+    public void setComponentsVisibility(boolean userAuthenticated,String nickname){
         if (userAuthenticated) {
             emailEditText.setVisibility(View.GONE);
             passwordEditText.setVisibility(View.GONE);

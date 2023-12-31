@@ -11,9 +11,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.UserProfileChangeRequest;
-
 public class MainActivity extends AppCompatActivity {
     private EditText emailEditText,passwordEditText,nicknameEditText;
     private Button signInButton,signUpButton,signOutButton,findSomeoneButton;
@@ -78,9 +75,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void chat(View view){
-
-        Intent intent = new Intent(this, ChatroomActivity.class);
-        intent.putExtra("nickname",FirebaseUtil.getNickname());
+        Intent intent = new Intent(this, ChatroomFindUserActivity.class);
         startActivity(intent);
     }
 

@@ -16,9 +16,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 public class ChatroomActivity extends AppCompatActivity {
-    TextView textView2,allMessages;
-    EditText message;
-    String nickname;
+    private TextView textView2,allMessages;
+    private EditText message;
+    private String userToChatNickname;
     FirebaseDatabase database;
     DatabaseReference reference;
 
@@ -26,9 +26,11 @@ public class ChatroomActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chatroom);
+
         textView2 = findViewById(R.id.textView2);
-        nickname = getIntent().getStringExtra("nickname");
-        textView2.setText("Hello "+nickname);
+        userToChatNickname = getIntent().getStringExtra("userToChatNickname");
+        textView2.setText(userToChatNickname);
+
         allMessages = findViewById(R.id.textView3);
         allMessages.setText("");
         message = findViewById(R.id.editTextText3);
@@ -50,7 +52,7 @@ public class ChatroomActivity extends AppCompatActivity {
     }
     public void send(View view){
         if (!message.getText().toString().trim().isEmpty()){
-            reference.setValue(nickname+":"+message.getText().toString());
+            reference.setValue(FirebaseUtil.getNickname()+":"+message.getText().toString());
             message.setText("");
         }else {
             showMessage("Error","Please write a message first!..");

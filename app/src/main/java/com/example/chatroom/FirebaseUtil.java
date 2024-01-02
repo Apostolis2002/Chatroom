@@ -4,9 +4,6 @@ package com.example.chatroom;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
@@ -47,48 +44,42 @@ public class FirebaseUtil {
 
     static void signup(String email, String password, String nickname, MainActivity activity) {
         auth.createUserWithEmailAndPassword(email,password)
-            .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                @Override
-                public void onComplete(@NonNull Task<AuthResult> task) {
-                    if (task.isSuccessful()){
-                        if (getUser() != null){
-                            // Set user's nickname
-                            getUser().updateProfile(new UserProfileChangeRequest.Builder().setDisplayName(nickname).build());
+            .addOnCompleteListener(task -> {
+                if (task.isSuccessful()){
+                    if (getUser() != null){
+                        // Set user's nickname
+                        getUser().updateProfile(new UserProfileChangeRequest.Builder().setDisplayName(nickname).build())
+                                .addOnCompleteListener(task1 -> {
+                                    if (task1.isSuccessful()){
+                                        //add the new user to database
+                                        User user = new User(getUid(),getEmail(),getNickname());
+                                        DatabaseReference reference = database.getReference("users").child(getUid());
+                                        Map<String, String> userData = new HashMap<>();
+                                        userData.put("email", getEmail());
+                                        userData.put("nickname",getNickname());
+                                        reference.setValue(userData);
 
-                            // Wait until the profile has been updated
-                            while (getNickname() == null){}
-
-                            //add the new user to database
-                            User user = new User(getUid(),getEmail(),getNickname());
-                            DatabaseReference reference = database.getReference("users").child(getUid());
-                            Map<String, String> userData = new HashMap<>();
-                            userData.put("email", getEmail());
-                            userData.put("nickname",getNickname());
-                            reference.setValue(userData);
-
-                            activity.setComponentsVisibility(true, getNickname());
-                            activity.showMessage("Success","User profile created!");
-                        }
-                    }else {
-                        activity.setComponentsVisibility(false, "");
-                        activity.showMessage("Error","Something went wrong!");
+                                        activity.setComponentsVisibility(true, getNickname());
+                                        activity.showMessage("Success","User profile created!");
+                                    }
+                                });
                     }
+                }else {
+                    activity.setComponentsVisibility(false, "");
+                    activity.showMessage("Error","Something went wrong!");
                 }
             });
     }
 
     static void signin(String email, String password,MainActivity activity) {
         auth.signInWithEmailAndPassword(email,password)
-            .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                @Override
-                public void onComplete(@NonNull Task<AuthResult> task) {
-                    if(task.isSuccessful()){
-                        activity.setComponentsVisibility(true, getNickname());
-                        activity.showMessage("Success","User signed in successfully!");
-                    }else {
-                        activity.setComponentsVisibility(false, "");
-                        activity.showMessage("Error","Check your credentials!");
-                    }
+            .addOnCompleteListener(task -> {
+                if(task.isSuccessful()){
+                    activity.setComponentsVisibility(true, getNickname());
+                    activity.showMessage("Success","User signed in successfully!");
+                }else {
+                    activity.setComponentsVisibility(false, "");
+                    activity.showMessage("Error","Check your credentials!");
                 }
             });
     }
@@ -107,15 +98,15 @@ public class FirebaseUtil {
                     for (Map.Entry<String, Object> entry : nestedMap.entrySet()) {
                         String key = entry.getKey();
                         Object value = entry.getValue();
-                        if (Objects.equals(key, getUid())){
-                            activity.showMessage("Error","You cannot talk to yourself!\nFind another user to talk!");
-                        }else{
+                        if (!Objects.equals(key, getUid())){
                             // get the nickname and the email from the nested maps
                             Map<String, Object> userMap = (Map<String, Object>) value;
                             String nickname = (String) userMap.get("nickname");
                             String email = (String) userMap.get("email");
                             User user = new User(key,email,nickname);
                             activity.addUserToLayout(user);
+                        }else {
+                            // skip current user, because we don't want to chat with ourselves
                         }
                     }
                 }else {

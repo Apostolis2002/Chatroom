@@ -1,6 +1,8 @@
 package com.example.chatroom;
 
+
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -8,6 +10,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -21,10 +24,10 @@ import java.util.Objects;
 public class FirebaseUtil {
 
     // Firebase Authorization
-    private static FirebaseAuth auth = FirebaseAuth.getInstance();
+    private static final FirebaseAuth auth = FirebaseAuth.getInstance();
 
     // Firebase Realtime Database
-    private static FirebaseDatabase database = FirebaseDatabase.getInstance();
+    private static final FirebaseDatabase database = FirebaseDatabase.getInstance();
 
     static FirebaseUser getUser() {
         return auth.getCurrentUser();
@@ -94,15 +97,6 @@ public class FirebaseUtil {
         auth.signOut();
     }
 
-    /*public static User getUser(String uid) {
-        User searchedUser;
-        DatabaseReference reference = database.getReference().child("users").child(uid);
-        reference.addListenerForSingleValueEvent();
-
-        searchedUser = new User()
-        return searchedUser;
-    }*/
-
     static void checkSearchedUserIfExist(String userNickname, ChatroomFindUserActivity activity) {
         DatabaseReference reference = database.getReference().child("users");
         reference.orderByChild("nickname").equalTo(userNickname).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -120,13 +114,120 @@ public class FirebaseUtil {
                             Map<String, Object> userMap = (Map<String, Object>) value;
                             String nickname = (String) userMap.get("nickname");
                             String email = (String) userMap.get("email");
-                            //activity.showMessage("FireBase",nickname+"\n"+email);
                             User user = new User(key,email,nickname);
                             activity.addUserToLayout(user);
                         }
                     }
                 }else {
                     activity.showMessage("Error","The user you are looking for doesn't exist!\nSearch a different email!");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    static void showChatMessages(String userToChatUid, ChatroomActivity activity) {
+        DatabaseReference reference1 = database.getReference().child("messages").child(getUid()+"-"+userToChatUid);
+        reference1.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                if(snapshot.exists()) {
+                    Map<String, Object> nestedMap = (Map<String, Object>) snapshot.getValue();
+                    String nickname = (String) nestedMap.get("senderNickname");
+                    String message = (String) nestedMap.get("messageText");
+                    activity.addMessageToLayout(nickname,message);
+                }
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        DatabaseReference reference2 = database.getReference().child("messages").child(userToChatUid+"-"+getUid());
+        reference2.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                if (snapshot.exists()) {
+                    Map<String, Object> nestedMap = (Map<String, Object>) snapshot.getValue();
+                    String nickname = (String) nestedMap.get("senderNickname");
+                    String message = (String) nestedMap.get("messageText");
+                    activity.addMessageToLayout(nickname,message);
+                }
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    static void sendMessage(String userToChatUid, String message) {
+        DatabaseReference reference1 = database.getReference().child("messages").child(getUid()+"-"+userToChatUid);
+        reference1.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists()) {
+                    String messageTime = String.valueOf(System.currentTimeMillis());
+                    String messageUid = reference1.push().getKey();
+                    reference1.child(messageUid).setValue(new Message(getNickname(),message,messageTime));
+                }else {
+                    DatabaseReference reference2 = database.getReference().child("messages").child(userToChatUid+"-"+getUid());
+                    reference2.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if(snapshot.exists()) {
+                                String messageTime = String.valueOf(System.currentTimeMillis());
+                                String messageUid = reference2.push().getKey();
+                                reference2.child(messageUid).setValue(new Message(getNickname(),message,messageTime));
+                            }else {
+                                String messageTime = String.valueOf(System.currentTimeMillis());
+                                String messageUid = reference1.push().getKey();
+                                reference1.child(messageUid).setValue(new Message(getNickname(),message,messageTime));
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
                 }
             }
 

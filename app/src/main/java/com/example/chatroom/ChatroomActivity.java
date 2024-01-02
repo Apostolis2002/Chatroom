@@ -1,63 +1,74 @@
 package com.example.chatroom;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-
 public class ChatroomActivity extends AppCompatActivity {
-    private TextView textView2,allMessages;
-    private EditText message;
+    private TextView userToChatNicknameTextView;
+    private EditText writeMessageEditTextText;
+    private ScrollView messagesScrollView;
+    private LinearLayout messagesLinearLayout;
     private String userToChatNickname;
-    FirebaseDatabase database;
-    DatabaseReference reference;
+    private String userToChatUid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chatroom);
 
-        textView2 = findViewById(R.id.textView2);
+        userToChatNicknameTextView = findViewById(R.id.userToChatNicknameTextView);
         userToChatNickname = getIntent().getStringExtra("userToChatNickname");
-        textView2.setText(userToChatNickname);
+        userToChatUid = getIntent().getStringExtra("userToChatUid");
+        userToChatNicknameTextView.setText(userToChatNickname);
+        messagesScrollView = findViewById(R.id.messagesScrollView);
+        messagesLinearLayout = findViewById(R.id.messagesLinearLayout);
 
-        allMessages = findViewById(R.id.textView3);
-        allMessages.setText("");
-        message = findViewById(R.id.editTextText3);
-        database = FirebaseDatabase.getInstance();
-        reference = database.getReference("message");
-        reference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                String previousMessages = allMessages.getText().toString();
-                if (snapshot.getValue()!=null)
-                    allMessages.setText(previousMessages+"\n"+snapshot.getValue().toString());
-            }
+        FirebaseUtil.showChatMessages(userToChatUid,this);
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
+        writeMessageEditTextText = findViewById(R.id.writeMessageEditTextText);
     }
+
+    void addMessageToLayout(String nickName, String message) {
+
+        // TextView creation
+        TextView messageTextView = new TextView(this);
+
+        // TextView layout
+        messageTextView.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_START);
+        messageTextView.setTextSize(16);
+        messageTextView.setBackgroundColor(getColor(R.color.white));
+
+        // TextView margins
+        ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        ViewGroup.MarginLayoutParams marginParams = new ViewGroup.MarginLayoutParams(params);
+        marginParams.setMargins(0, 5, 0, 5);
+        messageTextView.setLayoutParams(marginParams);
+
+        // TextView text
+        String messageText = nickName + ": " + message;
+        messageTextView.setText(messageText);
+
+        // TextView add to layout
+        messagesLinearLayout.addView(messageTextView);
+    }
+
     public void send(View view){
-        if (!message.getText().toString().trim().isEmpty()){
-            reference.setValue(FirebaseUtil.getNickname()+":"+message.getText().toString());
-            message.setText("");
+        if (!writeMessageEditTextText.getText().toString().trim().isEmpty()){
+            FirebaseUtil.sendMessage(userToChatUid,writeMessageEditTextText.getText().toString());
+            writeMessageEditTextText.setText("");
         }else {
             showMessage("Error","Please write a message first!..");
         }
     }
+
     void showMessage(String title, String message){
         new AlertDialog.Builder(this).setTitle(title).setMessage(message).setCancelable(true).show();
     }

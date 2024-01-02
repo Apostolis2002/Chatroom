@@ -36,7 +36,6 @@ public class ChatroomFindUserActivity extends AppCompatActivity {
     public void searchUsers(View view) {
         String userNickname = findUserNicknameEditText.getText().toString();
         FirebaseUtil.checkSearchedUserIfExist(userNickname,this);
-
     }
 
     void addUserToLayout(User user) {

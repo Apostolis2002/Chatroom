@@ -7,7 +7,7 @@
     tools:context=".ChatroomActivity">
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/userToChatNicknameTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="20sp"
@@ -19,7 +19,7 @@
         app:layout_constraintVertical_bias="0.021" />
 
     <ScrollView
-        android:id="@+id/scrollView2"
+        android:id="@+id/messagesScrollView"
         android:layout_width="381dp"
         android:layout_height="528dp"
         android:layout_marginTop="52dp"
@@ -29,23 +29,22 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
+            android:id="@+id/messagesLinearLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/textView3"
+                android:id="@+id/emptyTextView"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                android:layout_height="wrap_content" />
         </LinearLayout>
     </ScrollView>
 
     <EditText
-        android:id="@+id/editTextText3"
-        android:layout_width="275dp"
-        android:layout_height="40dp"
+        android:id="@+id/writeMessageEditTextText"
+        android:layout_width="276dp"
+        android:layout_height="51dp"
         android:ems="10"
         android:hint="message"
         android:inputType="text"
@@ -57,7 +56,7 @@
         app:layout_constraintVertical_bias="0.975" />
 
     <Button
-        android:id="@+id/button4"
+        android:id="@+id/sendMessageButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="send"

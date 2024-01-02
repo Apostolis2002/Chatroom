@@ -35,6 +35,7 @@ public class ChatroomFindUserActivity extends AppCompatActivity {
 
     public void searchUsers(View view) {
         String userNickname = findUserNicknameEditText.getText().toString();
+        deleteAllButtonsFromLayout();
         FirebaseUtil.checkSearchedUserIfExist(userNickname,this);
     }
 
@@ -74,6 +75,10 @@ public class ChatroomFindUserActivity extends AppCompatActivity {
             intent.putExtra("userToChatNickname", user.getNickname());
             startActivity(intent);
         });
+    }
+
+    void deleteAllButtonsFromLayout() {
+        usersLinearLayout.removeAllViews();
     }
 
     public void showMessage(String title, String message){

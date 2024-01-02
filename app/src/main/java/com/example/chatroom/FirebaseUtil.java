@@ -110,7 +110,7 @@ public class FirebaseUtil {
                         }
                     }
                 }else {
-                    activity.showMessage("Error","The user you are looking for doesn't exist!\nSearch a different email!");
+                    activity.showMessage("Error","The user you are looking for doesn't exist!\nSearch a different nickname!");
                 }
             }
 

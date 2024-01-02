@@ -4,6 +4,6 @@ Academic Year: 2023-2024
 
 Semester: 7th
 
-Speedometer App: Android Project
+Chatroom App: Android Project
 
 This project created for academic purposes only.

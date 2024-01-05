@@ -1,9 +1,9 @@
-University Of Piraeus Department of Informatics Undergraduate Course: Current Issues in Software Technology - Mobile Software
+# Chatroom Android App
 
-Academic Year: 2023-2024
+### University Of Piraeus Department of Informatics Undergraduate Course: Current Issues in Software Technology - Mobile Software
 
-Semester: 7th
+### Academic Year: 2023-2024
 
-Chatroom App: Android Project
+### Semester: 7th
 
-This project created for academic purposes only.
+### This project created for academic purposes only.
